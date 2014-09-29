@@ -1,5 +1,5 @@
-bin
-images
-.settings
+bin/
+images/
+.settings/
 .project
 .classpath

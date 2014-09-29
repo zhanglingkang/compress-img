@@ -22,6 +22,7 @@ public class CompressImg {
 
 	/**
 	 * 如果目录不是以/或者\结尾，结尾处加入/
+	 * 
 	 * @param dir
 	 * @return
 	 */
@@ -42,12 +43,12 @@ public class CompressImg {
 	}
 
 	public void setInputDir(String inputDir) {
-		
+
 		this.inputDir = getDir(inputDir);
 	}
 
 	public void setOutputDir(String outputDir) {
-		this.outputDir =getDir(outputDir);
+		this.outputDir = getDir(outputDir);
 	}
 
 	public void setInputFileName(String inputFileName) {
@@ -87,43 +88,48 @@ public class CompressImg {
 			if (!file.exists()) {
 				return "file is not exist";
 			}
-			Image img = ImageIO.read(file);
-			// 判断图片格式是否正确
-			if (img.getWidth(null) == -1) {
-				return "no";
-			} else {
-				int newWidth;
-				int newHeight;
-				// 判断是否是等比缩放
-				if (this.proportion == true) {
-					// 为等比缩放计算输出的图片宽度及高度
-					double rate1 = ((double) img.getWidth(null))
-							/ (double) outputWidth + 0.1;
-					double rate2 = ((double) img.getHeight(null))
-							/ (double) outputHeight + 0.1;
-					// 根据缩放比率大的进行缩放控制
-					double rate = rate1 > rate2 ? rate1 : rate2;
-					newWidth = (int) (((double) img.getWidth(null)) / rate);
-					newHeight = (int) (((double) img.getHeight(null)) / rate);
+			String fileName = file.getName();
+			if (fileName.endsWith("jpg") || fileName.endsWith("jpeg")
+					|| fileName.endsWith("png") || fileName.endsWith("gif")) {
+				Image img = ImageIO.read(file);
+				// 判断图片格式是否正确
+				if (img.getWidth(null) == -1) {
+					return "no";
 				} else {
-					newWidth = outputWidth; // 输出的图片宽度
-					newHeight = outputHeight; // 输出的图片高度
-				}
-				BufferedImage tag = new BufferedImage((int) newWidth,
-						(int) newHeight, BufferedImage.TYPE_INT_RGB);
+					int newWidth;
+					int newHeight;
+					// 判断是否是等比缩放
+					if (this.proportion == true) {
+						// 为等比缩放计算输出的图片宽度及高度
+						double rate1 = ((double) img.getWidth(null))
+								/ (double) outputWidth + 0.1;
+						double rate2 = ((double) img.getHeight(null))
+								/ (double) outputHeight + 0.1;
+						// 根据缩放比率大的进行缩放控制
+						double rate = rate1 > rate2 ? rate1 : rate2;
+						newWidth = (int) (((double) img.getWidth(null)) / rate);
+						newHeight = (int) (((double) img.getHeight(null)) / rate);
+					} else {
+						newWidth = outputWidth; // 输出的图片宽度
+						newHeight = outputHeight; // 输出的图片高度
+					}
+					BufferedImage tag = new BufferedImage((int) newWidth,
+							(int) newHeight, BufferedImage.TYPE_INT_RGB);
 
-				/*
-				 * Image.SCALE_SMOOTH 的缩略算法 生成缩略图片的平滑度的 优先级比速度高 生成的图片质量比较好 但速度慢
-				 */
-				tag.getGraphics().drawImage(
-						img.getScaledInstance(newWidth, newHeight,
-								Image.SCALE_SMOOTH), 0, 0, null);
-				FileOutputStream out = new FileOutputStream(outputDir
-						+ outputFileName);
-				// JPEGImageEncoder可适用于其他图片类型的转换
-				JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
-				encoder.encode(tag);
-				out.close();
+					/*
+					 * Image.SCALE_SMOOTH 的缩略算法 生成缩略图片的平滑度的 优先级比速度高 生成的图片质量比较好
+					 * 但速度慢
+					 */
+					tag.getGraphics().drawImage(
+							img.getScaledInstance(newWidth, newHeight,
+									Image.SCALE_SMOOTH), 0, 0, null);
+					FileOutputStream out = new FileOutputStream(outputDir
+							+ outputFileName);
+					// JPEGImageEncoder可适用于其他图片类型的转换
+					JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
+					encoder.encode(tag);
+					out.close();
+				}
 			}
 		} catch (IOException ex) {
 			ex.printStackTrace();
@@ -159,24 +165,20 @@ public class CompressImg {
 	/**
 	 * 
 	 * @param arg
-	 * arg[0] 源图片所在目录
-	 * arg[1] 压缩目录
-	 * arg[2] 输出图片宽度
-	 * arg[3] 输出图片高度
+	 *            arg[0] 源图片所在目录 arg[1] 压缩目录 arg[2] 输出图片宽度 arg[3] 输出图片高度
 	 * 
 	 */
 	public static void main(String[] arg) {
 		CompressImg mypic = new CompressImg();
 		String inputDir = arg[0];
 		String outputDir = arg[1];
-		Integer width=Integer.parseInt(arg[2]);
-		Integer height=Integer.parseInt(arg[3]);
+		Integer width = Integer.parseInt(arg[2]);
+		Integer height = Integer.parseInt(arg[3]);
 		File file = new File(inputDir);
 		File[] fileList = file.listFiles();
 		for (int i = 0; i < fileList.length; ++i) {
-			mypic.compressPic(inputDir, outputDir,
-					fileList[i].getName(), fileList[i].getName(), width, height,
-					true);
+			mypic.compressPic(inputDir, outputDir, fileList[i].getName(),
+					fileList[i].getName(), width, height, true);
 		}
 	}
 }
